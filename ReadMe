@@ -1,0 +1,150 @@
+renova_meuble est un site de vente de meuble d'occasion, 
+    - soit dans l'état,
+    - soit renové à la demande du client.
+
+LA BASE DE DONNEES EST DISPONIBLE DANS renova_meuble.sql, ainsi que dans le dossier joint.
+
+1. description des pages :
+    x- /(homepage) : les derniers meubles arrivés
+    x- /catégories/create : création d'une catégories
+    x- /catégories : liste différentes catégories meubles (rustique, vintage '70, provençal,...)
+    x- /catégories/{categories} : liste des meubles par catégories
+    x- /meubles/{meubles} : détails d'un meuble
+    x- /meubles/create : création d'un nouveau meuble
+    x- /cart : panier
+
+2. fonctionnalité :
+    x- sur la page détails d'un meuble, prévoir un bouton pour l'ajout au panier
+
+3. Description des entités :
+    Meuble : 
+    x- titre : string (max 255 caractères)
+    x- description : text (min 10 caractères)
+    x- categories : category[]
+    x- createdAt : datetime (date d'entrée en stock)
+    x- prix : float(nombre à virgule)
+
+    Category :
+    x- name : string (max 255)
+
+
+!!! Création du projet renova_meuble : !!! 
+
+.env ->
+    30 # DATABASE_URL="mysql://db_user:db_password@127.0.0.1:3306/db_name?serverVersion=5.7"
+    31 DATABASE_URL="postgresql://db_user:db_password@127.0.0.1:5432/db_name?serverVersion=13&charset=utf8"
+
+    30 DATABASE_URL="mysql://root:@127.0.0.1:3306/renova_meuble?serverVersion=10.4.18-MariaDB"
+    31 # DATABASE_URL="postgresql://db_user:db_password@127.0.0.1:5432/db_name?serverVersion=13&charset=utf8"
+
+config/packages/twig.yaml :
+    3 form_themes: ['bootstrap_4_layout.html.twig']
+
+src/Entity/User.php : (dans mon User)
+    13 class User implements UserInterface, PasswordAuthenticatedUserInterface
+    - dans le User de Julien : class User implements UserInterface
+    - et il n'a pas ma ligne 7 avec PasswordAuthenticatedUserInterface
+
+User.php :
+    60 changer getUserIdentifier par getUserName
+
+src/security/LoginFormAuthenticator :
+    55 throw new \Exception('TODO: provide a valid redirect inside '.__FILE__);
+             remplacée par l'exemple :
+    55 return new RedirectResponse($this->urlGenerator->generate('list_meuble'));
+
+CategoryController.php : "create"(reservé à l'admin) 
+    13 use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
+    35 *@IsGranted("ROLE_ADMIN")
+
+src/templates/categories/list :
+    13     {% if is_granted('ROLE_USER') %}
+
+config/packages/security.yaml :
+    40   role_hierarchy:
+    41         ROLE_ADMIN : ROLE_USER
+    42         ROLE_SUPER_ADMIN: ROLE_ADMIN
+
+base.html.twig : (pour avoir une barre noire avec tout aligné dessus)
+    <nav class="navbar navbar-dark bg-dark navbar-expand-lg">
+    <link rel="stylesheet" href="public/style/style.css">
+    dataTables :(pagination)
+        11 <link rel="stylesheet" type="text/css" href="//cdn.datatables.net/1.10.24/css/jquery.dataTables.min.css">
+        18 <script type="application/javascript" src="//cdn.datatables.net/1.10.24/js/jquery.dataTables.min.js">
+
+installation de composer require twig/string-extra pour bénéficier de |u.truncate
+
+MeubleRepository : 
+    public function findOrderByCreationDate(){
+    return $this->createQueryBuilder('b')
+            ->orderBy('b.createdAt', 'DESC')
+        ->getQuery()
+        ->getResult();
+    }
+HomeController : 
+    /**
+    * @Route("/", name="home")
+    */
+    public function home(Request $request){
+        $meubleList = $this->meubleRepository->findOrderByCreationDate();
+        return $this->render("home.html.twig", ['meubleList' => $meubleList]);
+    }
+
+PanierRepository : 
+    public function findByUserAndMeuble(User $user, Meuble $meuble){
+        return $this->createQueryBuilder('c')
+        ->andWhere('c.meuble = :meuble')
+        ->andWhere('c.user = :user')
+        ->setParameters([
+            'meuble' => $meuble,
+            'user' => $user
+        ])
+        ->getQuery()
+        ->getOneOrNullResult();
+    }
+
+installation composer require symfony/webpack-encore-bundle
+
+installation npm install --global yarn
+
+installation yarn install
+
+installation yarn encore dev-server
+
+list_meuble et list_category :
+        {% block javascript %}
+            {{ parent() }}
+            <script>
+                $(document).ready( function () {
+                    $('#category_table').DataTable();
+                } );
+            </script>
+        {% endblock %}
+
+config/packages : création de paginator.yaml(avec knp paginator)
+    - modif : 11         pagination: '@KnpPaginator/Pagination/sliding.html.twig'     # sliding pagination controls template
+    - par :   11         pagination: '@KnpPaginator/Pagination/twitter_bootstrap_v4_pagination.html.twig'     # sliding pagination controls template
+
+# config/packages/vich_uploader.yaml or app/config/config.yml
+vich_uploader:
+    db_driver: orm
+
+    mappings:
+        meuble_image:
+            uri_prefix: /images/meubles
+            upload_destination: '%kernel.project_dir%/public/images/meubles'
+            namer: Vich\UploaderBundle\Naming\SmartUniqueNamer
+
+config/services.yaml : (on peut supprimer si problème)
+7       app.path.meuble_images: /uploads/images/meubles
+8        # ...
+
+installation composer require easycorp/easyadmin-bundle
+
+dans bundles.php ajout de :     Vich\UploaderBundle\VichUploaderBundle :: class => ['all' => true],
+
+Meuble.php : ligne 85 ajout de nullable=true pour DateTime
+
+
+
+

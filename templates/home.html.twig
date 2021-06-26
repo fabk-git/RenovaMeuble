@@ -1,0 +1,24 @@
+{% extends "base.html.twig" %}
+
+{% block title %} Bienvenue sur Renova'Meuble {% endblock %}
+
+{% block body %}
+    <div class="ban">
+        <img src="/images/bannière.jpg" width="100%" height="1%" alt="bannière">
+    </div>
+
+    <h1>Liste des derniers meubles entrés</h1>
+    <hr>
+
+    {% for meuble in pagination %}
+        <h4>{{ meuble.titre }}</h4>
+        <p>{{ meuble.description|u.truncate(100, '...')}}</p>
+        <a class="btn btn-primary" href={{ path('detail_meuble', {id:meuble.id})}}>plus de détails</a>
+        <hr>
+    {% endfor %}
+
+{# display navigation #}
+<div class="navigation">
+    {{ knp_pagination_render(pagination) }}
+</div>
+{% endblock %}

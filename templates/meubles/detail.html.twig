@@ -1,0 +1,29 @@
+{% extends "base.html.twig" %}
+
+{% block title %} details du meuble {{ meuble.titre }}{% endblock %}
+
+{% block body %}
+
+    {% for message in app.flashes('notif') %}
+        <div class="alert alert-success">
+            {{ message }}
+        </div>
+    {% endfor %}
+    
+    <h1>{{ meuble.titre }}</h1>
+    <h3>{{ meuble.description }}</h3>
+    <p>Prix : {{ meuble.prix }} €</p>
+    <img src={{ vich_uploader_asset(meuble, 'imageFile') }} width="400px">
+    
+    {% if is_granted("ROLE_USER") %}
+        <a class="btn btn-primary" href={{ path('add_to_cart', {id: meuble.id})}}>Ajouter au panier</a>
+        {% else %}
+    <p>Veuillez vous <a href={{ path('app_login')}}>connecter</a>
+         ou vous <a href={{ path('register_user')}}>enregistrer</a>
+          pour ajouter ce meuble à votre panier !</p>
+    {% endif %}
+    <br><br>
+    {% if is_granted("ROLE_ADMIN") %}
+    <a class="btn btn-warning" href={{ path('update_meuble', {id: meuble.id}) }}>Modifier le meuble</a>
+    {% endif %}
+{% endblock %}

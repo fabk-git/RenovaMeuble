@@ -1,0 +1,15 @@
+{% extends "base.html.twig" %}
+
+{% block title %}Categorie {{category.name}}{% endblock %}
+
+{% block body %}
+    
+    <h1>Liste des meubles de style {{ category.name }}</h1>
+    {% for meuble in category.meubles %}
+        <h3>{{ meuble.titre }}</h3>
+        <p>{{ meuble.description|u.truncate(100, '...')}}</p>
+        <img src={{ vich_uploader_asset(meuble, 'imageFile') }} width="100px">
+
+        <hr>
+    {% endfor %}
+{% endblock %}

@@ -1,0 +1,41 @@
+{% extends "base.html.twig" %}
+
+{% block title %}Catégories de meubles{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <script>
+        $(document).ready( function () {
+           $('#category_table').DataTable();
+        } );
+    </script>
+{% endblock %}
+
+{% block body %}
+   
+    <h1>Liste des catégories</h1>
+    <table class="table" id="category_table">
+        <thead>
+            <th>Style</th>
+            {% if is_granted('ROLE_ADMIN') %}
+            <th>Suppression</th>
+            {% endif %}
+        </thead>
+
+        <tbody>
+            {% for category in categoryList %}
+                <tr>
+                <td><a class="btn btn-outline-info" href={{path('detail_category', {id: category.id})}}>{{ category.name }}</a></td>
+                {% if is_granted('ROLE_ADMIN') %}
+                <td><a class="btn btn-outline-danger" href={{ path('delete_category', { id: category.id })}}>Supprimer cette catégorie</a></td>
+                {% endif %}
+                </tr>
+            {% endfor %}
+        </tbody>
+
+    </table>
+    
+    {% if is_granted('ROLE_ADMIN') %}
+         <a class="btn btn-warning" href={{ path('create_category')}}>Créer une nouvelle catégorie</a>
+    {% endif %}
+{% endblock %}

@@ -1,0 +1,29 @@
+{% extends "base.html.twig" %}
+
+{% block title %}Mon panier{% endblock %}
+
+{% block body %}
+    <h1>Mon panier</h1>
+    <table class="table col-6">
+        <thead>
+            <th>Article</th>
+            <th>Prix unitaire</th>
+            <th>Quantité</th>
+            <th>Total</th>
+        </thead>
+        <tbody>
+            {% for line in paniers %}
+                <tr>
+                    <td>{{ line.meuble.titre }}</td>
+                    <td>{{ line.meuble.prix }}</td>
+                    <td>{{ line.quantity }}</td>
+                    <td>{{ line.lineAmount }}</td>
+                    <td><a class="btn btn-warning" href={{ path('delete_panier', {id:line.id})}} >Supprimer</a></td>
+                </tr>
+
+             {% endfor %}
+        </tbody>
+    </table>
+    <p><a class="btn btn-danger" href={{path('empty_cart')}} >Vider le panier</a></p>
+    <h3>Montant total de la commande : {{ totalAmount }} €</h3>
+{% endblock %}

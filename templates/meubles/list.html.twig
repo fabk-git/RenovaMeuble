@@ -1,0 +1,46 @@
+{% extends "base.html.twig" %}
+
+{% block title %}Meubles{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <script>
+        $(document).ready( function () {
+             $('#meuble_table').DataTable();
+        } );
+    </script>
+{% endblock %}
+
+{% block body %}
+    
+    <h1>Liste des meubles</h1>
+    <table class="table" id="meuble_table">
+        <thead>
+            <th>Type de meuble</th>
+            <th>Prix</th>
+            <th>Photo</th>
+            {% if is_granted('ROLE_ADMIN') %}
+            <th>Suppression</th>
+            {% endif %}
+        </thead>
+
+        <tbody>
+            {% for meuble in meubleList %}
+            <tr>
+                <td><a class="btn btn-outline-info" href={{ path('detail_meuble', { id: meuble.id })}}>{{ meuble.titre }}</a></td>
+                <td>{{ meuble.prix }} €</td>
+                <td><img src={{ vich_uploader_asset(meuble, 'imageFile') }} width="50px"></td>
+                {% if is_granted('ROLE_ADMIN') %}
+                <td><a class="btn btn-outline-danger" href={{ path('delete_meuble', { id: meuble.id })}}>Supprimer ce meuble</a></td>
+                {% endif %}
+            </tr>
+            {% endfor %}
+        </tbody>
+
+    </table><br>
+
+    {% if is_granted('ROLE_ADMIN') %}
+        <a class="btn btn-warning" href={{ path('create_meuble')}}>Nouveau meuble</a>
+    {% endif %}
+
+{% endblock %}
